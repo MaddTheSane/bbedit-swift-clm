@@ -410,31 +410,34 @@
             )
         )]]></string>
 		<key>Function Pattern</key>
-		<string><![CDATA[(?x:
-			(?>
-				(?P<function>
-					(^|\s)
-					(func|class|enum|struct|protocol|extension|typealias) (?# we have to match all the names in one go to bind function_name, so we have to match the name and then all possible following stuff separately)
-					\s+
-					(?P<function_name>
-						[A-Za-z_][A-Za-z_0-9]*
-					)
-					(
-						\s* = \s* .*	(?# typealias existing type)
-					|
-						[^{]*
-						(?P<block>							(?# body)
-							{									(?# literal lbrace)
-								(?>
-									(?> [^{}]+ )
-								  | (?P>block)					(?# recursion!)
-								)*
-							}									(?# literal rbrace)
-						)
-					)
-				)
-			)
-		)]]></string>
+        <string><![CDATA[(?x:
+            (?>
+                (?P<function>
+                    (^|\s)
+                    (?# we have to match all the names in one go to bind function_name, so we have to match the name and then all possible following stuff separately)
+                    ((?P<braces>func)|class\s+func|class|enum|struct|protocol|extension|typealias)
+                    \s+
+                    (?P<function_name>
+                        [A-Za-z_=<][A-Za-z_0-9=]*
+                    )
+                    (
+                        \s* = \s* .*    (?# typealias existing type)
+                    |
+                        (?(<braces>)    (?# since we can't do nested matches, only match braces for functions)
+                            [^{]*
+                            (?P<block>                          (?# body)
+                                {                               (?# literal lbrace)
+                                    (?>
+                                        (?> [^{}]+ )
+                                      | (?P>block)              (?# recursion!)
+                                    )*
+                                }                               (?# literal rbrace)
+                            )
+                        )
+                    )
+                )
+            )
+        )]]></string>
 		<key>Skip Pattern</key>
 		<string><![CDATA[(?x:
 			(?P>string) |

@@ -399,14 +399,16 @@
 		  		 \*/)
 		)]]></string>
 		<key>String Pattern</key>
-		<string><![CDATA[(?x:
-			(?>	"	(
-						[^"\r\\]	(?# match anything potential ending quote, new line, or start of escape sequence)
-					|	\\.			(?# match any escape sequence pair)
-					)*?
-				"
-			)
-		)]]></string>
+        <string><![CDATA[(?x:
+            """(?s).*?"""
+            |
+            (?> "   (
+                        [^"\r\\]    (?# match anything potential ending quote, new line, or start of escape sequence)
+                    |   \\.         (?# match any escape sequence pair)
+                    )*?
+                "
+            )
+        )]]></string>
 		<key>Function Pattern</key>
 		<string><![CDATA[(?x:
 			(?>

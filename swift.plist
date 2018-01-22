@@ -82,6 +82,7 @@
 		<string>operator</string>
 		<string>override</string>
 		<string>required</string>
+		<string>convenience</string>
 		<string>postfix</string>
 		<string>precedence</string>
 		<string>prefix</string>

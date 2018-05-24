@@ -118,6 +118,7 @@
 		<string>#if</string>
 		<string>#endif</string>
 		<string>#else</string>
+		<string>#elseif</string>
 		<string>final</string>
 		<string>defer</string>
 	</array>

@@ -29,9 +29,14 @@
 		<string>subscript</string>
 		<string>typealias</string>
 		<string>var</string>
+		<string>lazy</string>
 		<string>private</string>
 		<string>internal</string>
 		<string>public</string>
+		<string>fileprivate</string>
+		<string>open</string>
+		<string>throws</string>
+		<string>rethrows</string>
 		<!-- statements -->
 		<string>break</string>
 		<string>case</string>
@@ -49,6 +54,9 @@
 		<string>while</string>
 		<string>repeat</string>
 		<string>guard</string>
+		<string>throw</string>
+		<string>try</string>
+		<string>catch</string>
 		<!-- expressions and types -->
 		<string>as</string>
 		<string>dynamicType</string>
@@ -74,6 +82,8 @@
 		<string>nonmutating</string>
 		<string>operator</string>
 		<string>override</string>
+		<string>required</string>
+		<string>convenience</string>
 		<string>postfix</string>
 		<string>precedence</string>
 		<string>prefix</string>
@@ -84,6 +94,32 @@
 		<string>unowned(unsafe)</string>
 		<string>weak</string>
 		<string>willSet</string>
+		<string>nil</string>
+		<string>true</string>
+		<string>false</string>
+		<string>@available</string>
+		<string>@_fixed_layout</string>
+		<string>@escaping</string>
+		<string>@autoclosure</string>
+		<string>@testable</string>
+		<string>#available</string>
+		<string>@convention</string>
+		<string>@discardableResult</string>
+		<string>@objc</string>
+		<string>@NSManaged</string>
+		<string>@IBAction</string>
+		<string>#keyPath</string>
+		<string>#selector</string>
+		<string>#file</string>
+		<string>#line</string>
+		<string>#function</string>
+		<string>@nonobjc</string>
+		<string>optional</string>
+		<string>#if</string>
+		<string>#endif</string>
+		<string>#else</string>
+		<string>final</string>
+		<string>defer</string>
 	</array>
 	<key>BBLMPredefinedNameList</key>
 	<array>
@@ -136,6 +172,8 @@
 		<string>ContiguousArray</string>
 		<string>ContiguousArrayBuffer</string>
 		<string>ContiguousArrayStorage</string>
+		<string>Data</string>
+		<string>Date</string>
 		<string>DebugPrintable</string>
 		<string>Dictionary</string>
 		<string>DictionaryGenerator</string>
@@ -323,6 +361,7 @@
 		<string>withUnsafePointerToObject</string>
 		<string>withUnsafePointers</string>
 		<string>withVaList</string>
+		<string>autoreleasepool</string>
 		<string>Data</string>
 		<string>URL</string>
 	</array>
@@ -350,7 +389,7 @@
 	<key>Language Features</key>
 	<dict>
 		<key>Identifier and Keyword Character Class</key>
-		<string>A-Za-z_0-9</string>
+		<string>A-Za-z_0-9@\#</string>
 		<key>Comment Pattern</key>
 		<string><![CDATA[(?x:
 			(?>  //  [^\r]*              \r)    (?# single line comment)
@@ -364,43 +403,59 @@
 		  		 \*/)
 		)]]></string>
 		<key>String Pattern</key>
+        <string><![CDATA[(?x:
+            """(?s).*?"""
+            |
+            (?> "   (
+                        [^"\r\\]    (?# match anything potential ending quote, new line, or start of escape sequence)
+                    |   \\.         (?# match any escape sequence pair)
+                    )*?
+                "
+            )
+        )]]></string>
+		<key>Number Pattern</key>
 		<string><![CDATA[(?x:
-			(?>	"	(
-						[^"\r\\]	(?# match anything potential ending quote, new line, or start of escape sequence)
-					|	\\.			(?# match any escape sequence pair)
-					)*?
-				"
+			(?>
+			  \b(	(?P<dec>\d[\d_]*)(\.(?P>dec)([eE][-+]?(?P>dec))?)?				(?# decimal/floating point literal)
+				|	0x(?P<hex>[\da-fA-F][\da-fA-F_]*)(\.(?P>hex)[pP][-+]?(?P>dec))?	(?# hexadecimal/floating point literal)
+				|	0b[01][01_]*	|	0o[0-7][0-7_]*								(?# binary, octal literals)
+				|	true|false|nil													(?# boolean, nil literals)
+				)\b
 			)
 		)]]></string>
 		<key>Function Pattern</key>
-		<string><![CDATA[(?x:
-			(?>
-				(?P<function>
-					(^|\s)
-					(func|class|enum|struct|protocol|extension|typealias) (?# we have to match all the names in one go to bind function_name, so we have to match the name and then all possible following stuff separately)
-					\s+
-					(?P<function_name>
-						[A-Za-z_][A-Za-z_0-9]*
-					)
-					(
-						\s* = \s* .*	(?# typealias existing type)
-					|
-						[^{]*
-						(?P<block>							(?# body)
-							{									(?# literal lbrace)
-								(?>
-									(?> [^{}]+ )
-								  | (?P>block)					(?# recursion!)
-								)*
-							}									(?# literal rbrace)
-						)
-					)
-				)
-			)
-		)]]></string>
+        <string><![CDATA[(?x:
+            (?>
+                (?P<function>
+                    (^|\s)
+                    (?# we have to match all the names in one go to bind function_name, so we have to match the name and then all possible following stuff separately)
+                    ((?P<braces>func)|class\s+func|class|enum|struct|protocol|extension|typealias)
+                    \s+
+                    (?P<function_name>
+                        [A-Za-z_=<][A-Za-z_0-9=]*
+                    )
+                    (
+                        \s* = \s* .*    (?# typealias existing type)
+                    |
+                        (?(<braces>)    (?# since we can't do nested matches, only match braces for functions)
+                            [^{]*
+                            (?P<block>                          (?# body)
+                                {                               (?# literal lbrace)
+                                    (?>
+                                        (?> [^{}]+ )
+                                      | (?P>block)              (?# recursion!)
+                                    )*
+                                }                               (?# literal rbrace)
+                            )
+                        )
+                    )
+                )
+            )
+        )]]></string>
 		<key>Skip Pattern</key>
 		<string><![CDATA[(?x:
 			(?P>string) |
+			(?P>number) |
 			(?P>comment)
 		)]]></string>
 	</dict>

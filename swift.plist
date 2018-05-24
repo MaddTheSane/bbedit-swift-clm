@@ -47,6 +47,8 @@
 		<string>switch</string>
 		<string>where</string>
 		<string>while</string>
+		<string>repeat</string>
+		<string>guard</string>
 		<!-- expressions and types -->
 		<string>as</string>
 		<string>dynamicType</string>
@@ -321,6 +323,8 @@
 		<string>withUnsafePointerToObject</string>
 		<string>withUnsafePointers</string>
 		<string>withVaList</string>
+		<string>Data</string>
+		<string>URL</string>
 	</array>
 	<key>BBLMSuffixMap</key>
 	<array>
